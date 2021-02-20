@@ -29,7 +29,6 @@ endif()
 
 add_custom_target(pre_install
     COMMAND sudo apt update && sudo apt install -y ${DEPEND_APT}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 # cmake externalproject
@@ -48,7 +47,7 @@ externalproject_add(ODE
     BUILD_COMMAND       ""
     INSTALL_COMMAND
     cd <SOURCE_DIR> && ./autogen.sh && ./configure --enable-shared --disable-demos --enable-double-precision --disable-asserts --enable-malloc && make -j$(nproc) && sudo make install
-    # DEPENDS pre_install
+    DEPENDS pre_install
 )
 else(WITH_TBB)
 externalproject_add(ODE
@@ -58,9 +57,12 @@ externalproject_add(ODE
     "-DODE_DOUBLE_PRECISION=ON"
     "-DODE_WITH_DEMOS=OFF"
     "-DODE_WITH_TESTS=OFF"
-    # DEPENDS pre_install
+    DEPENDS pre_install
 )
 endif(WITH_TBB)
+externalproject_get_property(ODE SOURCE_DIR)
+set(ODE_SOURCE_DIR ${SOURCE_DIR})
+
 externalproject_add(SimSpark
     GIT_REPOSITORY      ${SIMSPARK_URL}
     GIT_TAG             "master"
@@ -69,6 +71,8 @@ externalproject_add(SimSpark
     INSTALL_COMMAND     cd <SOURCE_DIR> && bash build.sh
     DEPENDS ODE
 )
+externalproject_get_property(SimSpark SOURCE_DIR)
+set(SimSpark_SOURCE_DIR ${SOURCE_DIR})
 
 if(WITH_ROBOVIZ)
 externalproject_add(RoboViz
@@ -117,8 +121,8 @@ externalproject_add(SimSpark
     BUILD_COMMAND       ""
     INSTALL_COMMAND     cd <SOURCE_DIR> && bash build.sh
     CMAKE_ARGS
-    "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
-    DEPENDS ODE
+    # "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+    # DEPENDS ODE
 )
 endif(INSTALL_TO_SYSTEM)
 
@@ -138,4 +142,20 @@ endif(WITH_ROBOVIZ)
 add_custom_target(clean_all
     COMMAND sudo rm -rf CMakeFiles 
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_custom_target(uninstall_ode
+    COMMAND sudo make uninstall && make clean 
+    WORKING_DIRECTORY ${ODE_SOURCE_DIR}
+)
+
+add_custom_target(uninstall_simspark
+    COMMAND sudo make uninstall
+    WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/spark/build
+    COMMAND sudo make uninstall
+    WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/rcssserver3d/build
+)
+
+add_custom_target(uninstall_all
+    DEPENDS uninstall_simspark uninstall_ode
 )
