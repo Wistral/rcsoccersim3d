@@ -9,7 +9,7 @@ set(DEPEND_APT build-essential subversion cmake make libfreetype6-dev libsdl1.2-
 option(DOMESTIC "use domestic mirror for acceleration" ON)
 option(WITH_TBB "use TBB multithread" ON)
 option(INSTALL_TO_SYSTEM "install to system path(need sudo privilege)" ON)
-option(WITH_ROBOVIZ "with RoboViz rebinded" OFF)
+option(WITH_ROBOVIZ "with RoboViz rebinded" ON)
 
 if(DOMESTIC)
     if(WITH_TBB)
@@ -35,9 +35,7 @@ add_custom_target(pre_install
 include(ExternalProject)
 
 if(INSTALL_TO_SYSTEM)
-
-message(STATUS "install to system path")
-# set(EXTERNALLIB_PREFIX ODElib)
+message(WARNING "Install to system path")
 
 if(WITH_TBB)
 externalproject_add(ODE
@@ -77,17 +75,16 @@ set(SimSpark_SOURCE_DIR ${SOURCE_DIR})
 if(WITH_ROBOVIZ)
 externalproject_add(RoboViz
     GIT_REPOSITORY      ${ROBOVIZ_URL}
-    GIT_TAG             "master"
+    GIT_TAG             "1.6.1"
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
-    INSTALL_COMMAND     cd <SOURCE_DIR>/scripts && bash build.sh
+    INSTALL_COMMAND     <SOURCE_DIR>/scripts/build-linux64.sh
     DEPENDS SimSpark
 )
 
 externalproject_get_property(RoboViz SOURCE_DIR)
 set(RoboViz_SOURCE_DIR ${SOURCE_DIR})
 endif(WITH_ROBOVIZ)
-# message(STATUS RoboViz_SOURCE_DIR)
 else(INSTALL_TO_SYSTEM)
 
 set(EXTERNALLIB_PREFIX ODElib)
@@ -128,10 +125,9 @@ endif(INSTALL_TO_SYSTEM)
 
 if(WITH_ROBOVIZ)
 set(ADir "$bindir/rcssmonitor3d")
-set(BDir "${RoboViz_SOURCE_DIR}/scripts/roboviz.sh")
+set(BDir "${RoboViz_SOURCE_DIR}/bin/linux-amd64/roboviz.sh")
 set(Cstr "s#${ADir}#${BDir}#")
 
-# message(FATAL_ERROR "CSTR=${Cstr}")
 add_custom_target(rcsoccersim3d
     COMMAND sudo sed -i "s#${ADir}#${BDir}#" /usr/local/bin/rcsoccersim3d
     WORKING_DIRECTORY ${RoboViz_SOURCE_DIR}
