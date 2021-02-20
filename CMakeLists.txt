@@ -6,13 +6,14 @@ set(CMAKE_C_COMPILER "/usr/bin/gcc-7")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++-7")
 set(DEPEND_APT build-essential subversion cmake make libfreetype6-dev libsdl1.2-dev ruby ruby-dev libdevil-dev libboost-dev libboost-thread-dev libboost-regex-dev libboost-system-dev qt4-default libqt4-opengl libqt4-opengl-dev openjdk-8-jdk autogen automake libtool)
 
-option(DOMESTIC "use domestic mirror for acceleration" ON)
-option(WITH_TBB "use TBB multithread" ON)
+option(DOMESTIC "use domestic mirror for acceleration" OFF)
+option(WITH_TBB "use TBB multithread" OFF)
 option(INSTALL_TO_SYSTEM "install to system path(need sudo privilege)" ON)
 option(WITH_ROBOVIZ "with RoboViz rebinded" ON)
 
 if(DOMESTIC)
     if(WITH_TBB)
+        message(WARNING "Use ODE with TBB")
         set(ODE_URL "https://gitee.com/doot/ode-tbb.git")
     else(WITH_TBB)
         set(ODE_URL "https://gitee.com/yukareimu/ode")
@@ -20,13 +21,23 @@ if(DOMESTIC)
     message(WARNING "ODE repo: ${ODE_URL}")
     set(SIMSPARK_URL "https://gitee.com/yukareimu/SimSpark.git")
     set(ROBOVIZ_URL "https://gitee.com/doot/RoboViz")
+else(DOMESTIC)
+    if(WITH_TBB)
+        message(WARNING "Use ODE with TBB")
+        set(ODE_URL "https://github.com/sgvandijk/ode-tbb.git")
+    else(WITH_TBB)
+        set(ODE_URL "https://bitbucket.org/odedevs/ode.git")
+    endif(WITH_TBB)
+    message(WARNING "ODE repo: ${ODE_URL}")
+    set(SIMSPARK_URL "https://gitlab.com/robocup-sim/SimSpark")
+    set(ROBOVIZ_URL "https://github.com/magmaOffenburg/RoboViz")
 endif(DOMESTIC)
 
 if(NOT ODE_URL OR NOT SIMSPARK_URL OR NOT ROBOVIZ_URL)
     message(FATAL_ERROR "Repository URL empty!")
 endif()
-# custom targets
 
+# custom targets
 add_custom_target(pre_install
     COMMAND sudo apt update && sudo apt install -y ${DEPEND_APT}
 )
@@ -107,7 +118,6 @@ externalproject_add(ODE
 
 externalproject_get_property(ODE INSTALL_DIR)
 set(ODE_DIR ${INSTALL_DIR})
-# find_package(ode REQUIRED)
 
 set(EXTERNALLIB_PREFIX SimSparkLib)
 externalproject_add(SimSpark
