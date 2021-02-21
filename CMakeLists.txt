@@ -21,9 +21,6 @@ if(DOMESTIC)
     
     set(SIMSPARK_URL "https://gitee.com/yukareimu/SimSpark.git")
     set(ROBOVIZ_URL "https://gitee.com/doot/RoboViz.git")
-    foreach(URL ${ODE_URL} ${SIMSPARK_URL} ${ROBOVIZ_URL})
-        message(STATUS "repo: ${URL}")
-    endforeach()
     
 else(DOMESTIC)
     if(WITH_TBB)
@@ -41,6 +38,9 @@ if(NOT ODE_URL OR NOT SIMSPARK_URL OR NOT ROBOVIZ_URL)
     message(FATAL_ERROR "Repository URL empty!")
 endif()
 
+foreach(URL ${ODE_URL} ${SIMSPARK_URL} ${ROBOVIZ_URL})
+    message(STATUS "repo: ${URL}")
+endforeach()
 # custom targets
 add_custom_target(pre_install
     COMMAND sudo apt update && sudo apt install -y ${DEPEND_APT}
@@ -67,7 +67,7 @@ else(WITH_TBB)
 # set(EXTERNALLIB_PREFIX ODElib)
 externalproject_add(ODE
     GIT_REPOSITORY      ${ODE_URL}
-    GIT_TAG             "master"
+    GIT_TAG             "ad7b31fb0b610752d1c5101678e7fff214b84639"
     CMAKE_ARGS
     "-DODE_DOUBLE_PRECISION=ON"
     "-DODE_WITH_DEMOS=OFF"
@@ -91,19 +91,7 @@ externalproject_add(SimSpark
 externalproject_get_property(SimSpark SOURCE_DIR)
 set(SimSpark_SOURCE_DIR ${SOURCE_DIR})
 
-if(WITH_ROBOVIZ)
-externalproject_add(RoboViz
-    GIT_REPOSITORY      ${ROBOVIZ_URL}
-    GIT_TAG             "1.6.1"
-    CONFIGURE_COMMAND   ""
-    BUILD_COMMAND       ""
-    INSTALL_COMMAND     <SOURCE_DIR>/scripts/build-linux64.sh
-    DEPENDS SimSpark
-)
 
-externalproject_get_property(RoboViz SOURCE_DIR)
-set(RoboViz_SOURCE_DIR ${SOURCE_DIR})
-endif(WITH_ROBOVIZ)
 else(INSTALL_TO_SYSTEM)
 
 set(EXTERNALLIB_PREFIX ODElib)
@@ -114,7 +102,7 @@ externalproject_add(ODE
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
     INSTALL_COMMAND
-    cd <SOURCE_DIR> && ./autogen.sh && ./configure --prefix=<INSTALL_DIR>  --enable-shared --disable-demos --enable-double-precision --disable-asserts --enable-malloc && make install -j4
+    cd <SOURCE_DIR> && ./autogen.sh && ./configure --prefix=<INSTALL_DIR>  --enable-shared --disable-demos --enable-double-precision --disable-asserts --enable-malloc && make install -j$(nproc)
     # CMAKE_ARGS
     #     "-DBUILD_SHARED_LIBS=ON"
     #     "-DODE_DOUBLE_PRECISION=ON"
@@ -141,7 +129,20 @@ externalproject_add(SimSpark
 )
 endif(INSTALL_TO_SYSTEM)
 
+
 if(WITH_ROBOVIZ)
+externalproject_add(RoboViz
+    GIT_REPOSITORY      ${ROBOVIZ_URL}
+    GIT_TAG             "1.6.1"
+    CONFIGURE_COMMAND   ""
+    BUILD_COMMAND       ""
+    INSTALL_COMMAND     <SOURCE_DIR>/scripts/build-linux64.sh
+    DEPENDS SimSpark
+)
+
+externalproject_get_property(RoboViz SOURCE_DIR)
+set(RoboViz_SOURCE_DIR ${SOURCE_DIR})
+
 set(ADir "$bindir/rcssmonitor3d")
 set(BDir "${RoboViz_SOURCE_DIR}/bin/linux-amd64/roboviz.sh")
 set(Cstr "s#${ADir}#${BDir}#")
@@ -158,16 +159,27 @@ endif(WITH_ROBOVIZ)
 #     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 # )
 
+if(WITH_TBB)
 add_custom_target(uninstall_ode
     COMMAND sudo make uninstall && make clean 
     WORKING_DIRECTORY ${ODE_SOURCE_DIR}
+)
+else(WITH_TBB)
+add_custom_target(uninstall_ode
+    COMMAND sudo make uninstall && make clean 
+    WORKING_DIRECTORY ${ODE_SOURCE_DIR}/../ODE-build
+)
+endif(WITH_TBB)
+
+add_custom_target(uninstall_rcssserver3d
+    COMMAND sudo make uninstall
+    WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/rcssserver3d/build
 )
 
 add_custom_target(uninstall_simspark
     COMMAND sudo make uninstall
     WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/spark/build
-    COMMAND sudo make uninstall
-    WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/rcssserver3d/build
+    DEPENDS uninstall_rcssserver3d
 )
 
 add_custom_target(uninstall_all

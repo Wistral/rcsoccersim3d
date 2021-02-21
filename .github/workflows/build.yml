@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: rcsoccersim3d_install
 
 # Controls when the action will run. 
 on:
@@ -35,6 +35,14 @@ jobs:
           cd $GITHUB_WORKSPACE
           cmake .
           make -j$(nproc)
+          sudo make install
+          sudo make uninstall
+
+          cmake . -DWITH_TBB=ON
+          make -j$(nproc)
+          sudo make install
+          sudo make uninstall
+
   build_16:
     # The type of runner that the job will run on
     runs-on: ubuntu-16.04
@@ -48,16 +56,10 @@ jobs:
           cd $GITHUB_WORKSPACE
           cmake .
           make -j$(nproc)
-  build_20:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-      # Runs a set of commands using the runners shell
-      - name: build foreign ver.
-        run: |
-          cd $GITHUB_WORKSPACE
-          cmake .
+          sudo make install
+          sudo make uninstall
+
+          cmake . -DWITH_TBB=ON
           make -j$(nproc)
+          sudo make install
+          sudo make uninstall
