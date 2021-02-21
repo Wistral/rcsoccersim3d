@@ -16,11 +16,15 @@ if(DOMESTIC)
         message(WARNING "Use ODE with TBB")
         set(ODE_URL "https://gitee.com/doot/ode-tbb.git")
     else(WITH_TBB)
-        set(ODE_URL "https://gitee.com/yukareimu/ode")
+        set(ODE_URL "https://gitee.com/yukareimu/ode.git")
     endif(WITH_TBB)
-    message(WARNING "ODE repo: ${ODE_URL}")
+    
     set(SIMSPARK_URL "https://gitee.com/yukareimu/SimSpark.git")
-    set(ROBOVIZ_URL "https://gitee.com/doot/RoboViz")
+    set(ROBOVIZ_URL "https://gitee.com/doot/RoboViz.git")
+    foreach(URL ${ODE_URL} ${SIMSPARK_URL} ${ROBOVIZ_URL})
+        message(STATUS "repo: ${URL}")
+    endforeach()
+    
 else(DOMESTIC)
     if(WITH_TBB)
         message(WARNING "Use ODE with TBB")
@@ -52,6 +56,7 @@ if(WITH_TBB)
 externalproject_add(ODE
     GIT_REPOSITORY      ${ODE_URL}
     GIT_TAG             "master"
+    PREFIX              "ODE-tbb"
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
     INSTALL_COMMAND
@@ -59,13 +64,16 @@ externalproject_add(ODE
     DEPENDS pre_install
 )
 else(WITH_TBB)
+# set(EXTERNALLIB_PREFIX ODElib)
 externalproject_add(ODE
     GIT_REPOSITORY      ${ODE_URL}
     GIT_TAG             "master"
-    CMAKW_ARGS
+    CMAKE_ARGS
     "-DODE_DOUBLE_PRECISION=ON"
     "-DODE_WITH_DEMOS=OFF"
     "-DODE_WITH_TESTS=OFF"
+    INSTALL_COMMAND
+    sudo make install
     DEPENDS pre_install
 )
 endif(WITH_TBB)
@@ -73,7 +81,7 @@ externalproject_get_property(ODE SOURCE_DIR)
 set(ODE_SOURCE_DIR ${SOURCE_DIR})
 
 externalproject_add(SimSpark
-    GIT_REPOSITORY      ${SIMSPARK_URL}
+    GIT_REPOSITORY      "${SIMSPARK_URL}"
     GIT_TAG             "master"
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
@@ -145,10 +153,10 @@ add_custom_target(rcsoccersim3d
 )
 endif(WITH_ROBOVIZ)
 
-add_custom_target(clean_all
-    COMMAND sudo rm -rf CMakeFiles 
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-)
+# add_custom_target(clean_all
+#     COMMAND sudo rm -rf CMakeFiles 
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+# )
 
 add_custom_target(uninstall_ode
     COMMAND sudo make uninstall && make clean 
