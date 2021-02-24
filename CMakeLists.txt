@@ -167,25 +167,31 @@ endif(WITH_ROBOVIZ)
 #     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 # )
 
+if(INSTALL_TO_SYSTEM)
+    SET(UNINS_CMD sudo make uninstall && make clean)
+else(INSTALL_TO_SYSTEM)
+    SET(UNINS_CMD make uninstall && make clean)
+endif()
+
 if(WITH_TBB)
 add_custom_target(uninstall_ode
-    COMMAND sudo make uninstall && make clean 
+    COMMAND ${UNINS_CMD}
     WORKING_DIRECTORY ${ODE_SOURCE_DIR}
 )
 else(WITH_TBB)
 add_custom_target(uninstall_ode
-    COMMAND sudo make uninstall && make clean 
+    COMMAND ${UNINS_CMD}
     WORKING_DIRECTORY ${ODE_SOURCE_DIR}/../ODE-build
 )
 endif(WITH_TBB)
 
 add_custom_target(uninstall_rcssserver3d
-    COMMAND sudo make uninstall
+    COMMAND ${UNINS_CMD}
     WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/rcssserver3d/build
 )
 
 add_custom_target(uninstall_simspark
-    COMMAND sudo make uninstall
+    COMMAND ${UNINS_CMD}
     WORKING_DIRECTORY ${SimSpark_SOURCE_DIR}/spark/build
     DEPENDS uninstall_rcssserver3d
 )
