@@ -56,7 +56,7 @@ if(WITH_TBB)
 externalproject_add(ODE
     GIT_REPOSITORY      ${ODE_URL}
     GIT_TAG             "master"
-    PREFIX              "ODE-tbb"
+    # PREFIX              "ODE-tbb"
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
     INSTALL_COMMAND
@@ -98,7 +98,7 @@ if(WITH_TBB)
 externalproject_add(ODE
     GIT_REPOSITORY      ${ODE_URL}
     GIT_TAG             "master"
-    PREFIX              "ODE-tbb"
+    # PREFIX              "ODE-tbb"
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
     INSTALL_COMMAND
@@ -119,10 +119,7 @@ externalproject_add(ODE
     DEPENDS pre_install
 )
 endif(WITH_TBB)
-externalproject_get_property(ODE SOURCE_DIR)
-set(ODE_SOURCE_DIR ${SOURCE_DIR})
-# set environment var
-set(ODE_HOME ${ODE_SOURCE_DIR}/../..)
+
 
 externalproject_add(SimSpark
     GIT_REPOSITORY      ${SIMSPARK_URL}
@@ -137,6 +134,10 @@ set(SimSpark_SOURCE_DIR ${SOURCE_DIR})
 set(rcsoccersim3d_PATH ${SOURCE_DIR}/../../bin/rcsoccersim3d)
 endif(INSTALL_TO_SYSTEM)
 
+externalproject_get_property(ODE SOURCE_DIR)
+set(ODE_SOURCE_DIR ${SOURCE_DIR})
+externalproject_get_property(ODE BINARY_DIR)
+set(ODE_BUILD_DIR ${BINARY_DIR})
 
 if(WITH_ROBOVIZ)
 externalproject_add(RoboViz
@@ -173,17 +174,10 @@ else(INSTALL_TO_SYSTEM)
     SET(UNINS_CMD make uninstall && make clean)
 endif()
 
-if(WITH_TBB)
 add_custom_target(uninstall_ode
     COMMAND ${UNINS_CMD}
-    WORKING_DIRECTORY ${ODE_SOURCE_DIR}
+    WORKING_DIRECTORY ${ODE_BUILD_DIR}
 )
-else(WITH_TBB)
-add_custom_target(uninstall_ode
-    COMMAND ${UNINS_CMD}
-    WORKING_DIRECTORY ${ODE_SOURCE_DIR}
-)
-endif(WITH_TBB)
 
 add_custom_target(uninstall_rcssserver3d
     COMMAND ${UNINS_CMD}
