@@ -1,5 +1,7 @@
 ## rcsoccersim3d
 
+[![build](https://github.com/Wistral/rcsoccersim3d/actions/workflows/build.yml/badge.svg)](https://github.com/Wistral/rcsoccersim3d/actions/workflows/build.yml)
+
 cmake安装rcsoccersim3d，支持本地目录（非系统目录）安装
 
 ### RUN

@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: rcsoccersim3d_install
+name: rcsoccersim3d
 
 # Controls when the action will run. 
 on:
@@ -34,7 +34,7 @@ jobs:
           cmake . -DINSTALL_TO_SYSTEM=OFF -DWITH_ROBOVIZ=OFF
           make -j$(nproc)
           make rcsoccersim3d
-          make uninstall_all
+          sudo make uninstall_all
   
   build_18_domestic:
     # The type of runner that the job will run on
@@ -54,7 +54,7 @@ jobs:
           cmake . -DDOMESTIC=ON -DINSTALL_TO_SYSTEM=OFF -DWITH_ROBOVIZ=OFF
           make -j$(nproc)
           make rcsoccersim3d
-          make uninstall_all
+          sudo make uninstall_all
 
   build_16:
     # The type of runner that the job will run on
@@ -74,4 +74,4 @@ jobs:
           cmake . -DINSTALL_TO_SYSTEM=OFF -DWITH_ROBOVIZ=OFF
           make -j$(nproc)
           make rcsoccersim3d
-          make uninstall_all
+          sudo make uninstall_all

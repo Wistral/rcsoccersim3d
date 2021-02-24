@@ -181,7 +181,7 @@ add_custom_target(uninstall_ode
 else(WITH_TBB)
 add_custom_target(uninstall_ode
     COMMAND ${UNINS_CMD}
-    WORKING_DIRECTORY ${ODE_SOURCE_DIR}/../ODE-build
+    WORKING_DIRECTORY ${ODE_SOURCE_DIR}
 )
 endif(WITH_TBB)
 

@@ -1,5 +1,7 @@
 ## rcsoccersim3d
 
+[![build](https://github.com/Wistral/rcsoccersim3d/actions/workflows/build.yml/badge.svg)](https://github.com/Wistral/rcsoccersim3d/actions/workflows/build.yml)
+
 ### [中文介绍](README-zh.md)
 
 Install rcsoccersim3d simply
