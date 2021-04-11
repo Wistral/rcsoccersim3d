@@ -1,0 +1,9 @@
+.gradle
+CMakeFiles
+ODE*
+Sim*
+*.cmake
+*Cache.txt
+Makefile
+*-prefix
+rcsoccersim3d
