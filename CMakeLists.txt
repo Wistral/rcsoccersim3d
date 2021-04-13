@@ -4,14 +4,18 @@ project(rcsoccersim3d)
 ## compiler
 set(CMAKE_C_COMPILER "/usr/bin/gcc-7")
 set(CMAKE_CXX_COMPILER "/usr/bin/g++-7")
-set(DEPEND_APT build-essential subversion cmake make libfreetype6-dev libsdl1.2-dev ruby ruby-dev libdevil-dev libboost-dev libboost-thread-dev libboost-regex-dev libboost-system-dev qt4-default libqt4-opengl libqt4-opengl-dev openjdk-8-jdk autogen automake libtool)
+set(DEPEND_APT build-essential subversion make libfreetype6-dev libsdl1.2-dev ruby ruby-dev libdevil-dev libboost-dev libboost-thread-dev libboost-regex-dev libboost-system-dev qt4-default libqt4-opengl libqt4-opengl-dev autogen automake libtool)
 
 option(DOMESTIC "use domestic mirror for acceleration" OFF)
 option(WITH_TBB "use TBB multithread" OFF)
 option(INST2SYS "install to system path(need sudo privilege)" ON)
 option(WITH_ROBOVIZ "with RoboViz rebinded" ON)
 
-set(RELEASE_PATH "rcsoccersim3d")
+set(RELEASE_PATH "rcsoccersim3d-release")
+
+if(WITH_ROBOVIZ)
+set(DEPEND_APT APPEND openjdk-8-jdk)
+endif()
 
 if(DOMESTIC)
     if(WITH_TBB)
@@ -125,7 +129,7 @@ endif(WITH_TBB)
 
 externalproject_add(SimSpark
     GIT_REPOSITORY      ${SIMSPARK_URL}
-    GIT_TAG             "51a820881d9f97b53757d4479249340acd5fd5c6"
+    GIT_TAG             "e08e263e29787f899e70c8aecf4fe927df69198d"
     CONFIGURE_COMMAND   ""
     BUILD_COMMAND       ""
     INSTALL_COMMAND     cd <SOURCE_DIR> && bash build-local.sh <INSTALL_DIR>/../${RELEASE_PATH} ${ODE_HOME}
@@ -200,8 +204,12 @@ add_custom_target(uninstall_all
     DEPENDS uninstall_simspark uninstall_ode
 )
 
+add_custom_target(prepack
+    COMMAND ldd ${RELEASE_PATH}/bin/rcssserver3d |grep -v shan|awk '{ if($$3 != \"not\") print $$3}'|xargs -i cp {} ${RELEASE_PATH}/lib
+    COMMAND cp rcss3dinit.sh ${RELEASE_PATH}
+)
+
 add_custom_target(pack
-    COMMAND ldd rcsoccersim3d/bin/rcssserver3d |grep -v shan|awk '{print $$3}'|xargs -i cp {} rcsoccersim3d/lib
-    COMMAND tar -czf rcsoccersim3d.full.tgz rcsoccersim3d
-    BYPRODUCTS rcsoccersim3d.full.tgz
+    COMMAND tar -czf rcsoccersim3d.tgz ${RELEASE_PATH}
+    DEPENDS prepack
 )
